@@ -14,6 +14,7 @@ library(pastecs)
 
 # Statistiques avancées
 library(FactoMineR)
+library(factoextra)
 library(questionr)
 library(explor)
 library(forcats)
@@ -66,6 +67,7 @@ artif %>%
             arthab1121_tot = sum(arthab1121), 
             artmix1121_tot = sum(artmix1121),
             artinc1121_tot = sum(artinc1121), 
+            artcom2020_tot = sum(artcom2020 * surfcom2021) / sum(surfcom2021),
             surfcom2021_tot = sum(surfcom2021)) -> artif.epci
 
 # Import des données démographiques de l'Insee
@@ -109,31 +111,55 @@ insee.poptot %>%
 artif.epci %>%
   left_join(insee.poptot0818, by = "epci21") %>%
   relocate(epci21, epci21txt.x, epci21txt.y, varpop0818, sn_brut0818, sm_brut0818, nafart1121_tot, 
-           artact1121_tot, arthab1121_tot, artmix1121_tot, artinc1121_tot, surfcom2021_tot) %>%
+           artact1121_tot, arthab1121_tot, artmix1121_tot, artinc1121_tot, artcom2020_tot, surfcom2021_tot) %>%
   mutate(across(surfcom2021_tot, as.numeric)) %>%
   ungroup() %>%
   filter_all(all_vars(!is.na(.)))-> artpop.epci
   
 # Transformaition en classes (icut)
 
-artpop.epci$varpop0818 = cut(artpop.epci$varpop0818, breaks=quantile(artpop.epci$varpop0818), labels = FALSE)
-artpop.epci$sn_brut0818 = cut(artpop.epci$sn_brut0818, breaks=quantile(artpop.epci$sn_brut0818), labels = FALSE)
-artpop.epci$sm_brut0818 = cut(artpop.epci$sm_brut0818, breaks=quantile(artpop.epci$sm_brut0818), labels = FALSE)
-artpop.epci$nafart1121_tot = cut(artpop.epci$nafart1121_tot, breaks=quantile(artpop.epci$nafart1121_tot), labels = FALSE)
-artpop.epci$artact1121_tot = cut(artpop.epci$artact1121_tot, breaks=quantile(artpop.epci$artact1121_tot), labels = FALSE)
-artpop.epci$arthab1121_tot = cut(artpop.epci$arthab1121_tot, breaks=quantile(artpop.epci$arthab1121_tot), labels = FALSE)
-artpop.epci$artmix1121_tot = cut(artpop.epci$artmix1121_tot, breaks=quantile(artpop.epci$artmix1121_tot), labels = FALSE)
-artpop.epci$artinc1121_tot = cut(artpop.epci$artinc1121_tot, breaks=quantile(artpop.epci$artinc1121_tot), labels = FALSE)
-artpop.epci$surfcom2021_tot = cut(artpop.epci$surfcom2021_tot, breaks=quantile(artpop.epci$surfcom2021_tot), labels = FALSE)
+#artpop.epci$varpop0818 = cut(artpop.epci$varpop0818, breaks=quantile(artpop.epci$varpop0818), labels = FALSE)
+#artpop.epci$sn_brut0818 = cut(artpop.epci$sn_brut0818, breaks=quantile(artpop.epci$sn_brut0818), labels = FALSE)
+#artpop.epci$sm_brut0818 = cut(artpop.epci$sm_brut0818, breaks=quantile(artpop.epci$sm_brut0818), labels = FALSE)
+#artpop.epci$nafart1121_tot = cut(artpop.epci$nafart1121_tot, breaks=quantile(artpop.epci$nafart1121_tot), labels = FALSE)
+#artpop.epci$artact1121_tot = cut(artpop.epci$artact1121_tot, breaks=quantile(artpop.epci$artact1121_tot), labels = FALSE)
+#artpop.epci$arthab1121_tot = cut(artpop.epci$arthab1121_tot, breaks=quantile(artpop.epci$arthab1121_tot), labels = FALSE)
+#artpop.epci$artmix1121_tot = cut(artpop.epci$artmix1121_tot, breaks=quantile(artpop.epci$artmix1121_tot), labels = FALSE)
+#artpop.epci$artinc1121_tot = cut(artpop.epci$artinc1121_tot, breaks=quantile(artpop.epci$artinc1121_tot), labels = FALSE)
+#artpop.epci$surfcom2021_tot = cut(artpop.epci$surfcom2021_tot, breaks=quantile(artpop.epci$surfcom2021_tot), labels = FALSE)
 
 # ACM
 
+#artpop.epci %>%
+#  select(-epci21, -epci21txt.x, -epci21txt.y) %>%
+#  filter_all(all_vars(!is.na(.))) %>%
+#  MCA(ncp = 5, quanti.sup = 5:9, graph = FALSE, na.method = ) -> res.mca
+
 artpop.epci %>%
-  select(-epci21, -epci21txt.x, -epci21txt.y) %>%
+  select(nafart1121_tot, surfcom2021_tot, artcom2020_tot) %>%
   filter_all(all_vars(!is.na(.))) %>%
-  MCA(ncp = 5, quanti.sup = 5:9, graph = FALSE, na.method = ) -> acm.res
+  PCA(ncp = 5, graph = FALSE) -> res.pca
 
-print(acm.res)
-barplot(acm.res$eig[, 2], main="Histogramme des valeurs propres", names.arg=rownames(acm.res$eig), xlab="Axes", ylab="Pourcentage d’inertie", cex.axis=0.8, font.lab=3, col="orange")
+res.hcpc = HCPC(res.pca)
 
-explor(acm.res)
+print(res.pca)
+barplot(res.pca$eig[, 2], main="Histogramme des valeurs propres", names.arg=rownames(res.pca$eig), xlab="Axes", ylab="Pourcentage d’inertie", cex.axis=0.8, font.lab=3, col="orange")
+
+explor(res.pca)
+
+fviz_dend(res.hcpc, 
+          cex = 0.7,                     # Taille du text
+          palette = "jco",               # Palette de couleur ?ggpubr::ggpar
+          rect = TRUE, rect_fill = TRUE, # Rectangle autour des groupes
+          rect_border = "jco",           # Couleur du rectangle
+          labels_track_height = 0.8      # Augment l'espace pour le texte
+)
+
+fviz_cluster(res.hcpc,
+             repel = TRUE,            # Evite le chevauchement des textes
+             show.clust.cent = TRUE, # Montre le centre des clusters
+             palette = "jco",         # Palette de couleurs, voir ?ggpubr::ggpar
+             ggtheme = theme_minimal(),
+             main = "Factor map"
+)
+
