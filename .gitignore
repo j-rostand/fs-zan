@@ -73,3 +73,18 @@ Temporary Items
 *.xlsx
 *.xls
 *.csv
+
+# QGIS
+
+*.cbg
+*.dbf
+*.prj
+*.shp
+*.shx
+*.qgz
+*.pjw
+*.cpg
+*.pgw
+
+# PDF
+*.pdf
