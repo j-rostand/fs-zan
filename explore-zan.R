@@ -6,12 +6,14 @@
 
 # Bibliothèques
 library(tidyverse)
+library(magrittr)
 library(textshape)
 library(pastecs)
 library(FactoMineR)
 library(factoextra)
 library(questionr)
 library(explor)
+library(missMDA)
 
 #################################################
 ## Préparation des données : artificialisation ##
@@ -112,10 +114,10 @@ artpop.epci %>%
 
 res.hcpc = HCPC(res.pca)
 res.hcpc$data.clust -> artif.map
-artif.map %>%
-  left_join(artif.epci) %>%
-  select(epci21, epci21txt, clust, nafart1121_tot, artcom2020_tot) %>%
-  write_excel_csv("res/artif-epci-map.csv", quote = "all")
+#artif.map %>%
+#  left_join(artif.epci) %>%
+#  select(epci21, epci21txt, clust, nafart1121_tot, artcom2020_tot) %>%
+#  write_excel_csv("res/artif-epci-map.csv", quote = "all")
   
 # Analyses en composantes principales sur la démographie
 
@@ -130,11 +132,11 @@ explor(res2.pca)
 
 res2.hcpc = HCPC(res2.pca)
 res2.hcpc$data.clust -> demographie.map
-demographie.map %>%
-  rownames_to_column("epci21") %>%
-  left_join(artif.epci, by = "epci21") %>%
-  select(epci21, epci21txt, clust, varpop0818, sn_brut0818, sm_brut0818) %>%
-  write_excel_csv("res/demographie-epci-map.csv", quote = "all")
+#demographie.map %>%
+#  rownames_to_column("epci21") %>%
+#  left_join(artif.epci, by = "epci21") %>%
+#  select(epci21, epci21txt, clust, varpop0818, sn_brut0818, sm_brut0818) %>%
+#  write_excel_csv("res/demographie-epci-map.csv", quote = "all")
 
 # Classification manuelle pour la démographie
 # https://www.observatoire-des-territoires.gouv.fr/typologie-des-soldes-naturel-et-migratoire-apparent
@@ -154,6 +156,131 @@ insee.poptot0818.rec %>%
                            varpop0818_rec == 0 & sn_brut0818_rec == 0 & sm_brut0818_rec == 0 ~ "Décroissance totale")) %>%
   select(epci21, epci21txt, clust) -> insee.poptot0818.rec.clust
 
-insee.poptot0818.rec.clust %>%
-  write_excel_csv("res/demographie-epci-binaire-map.csv", quote = "all")
+#insee.poptot0818.rec.clust %>%
+#  write_excel_csv("res/demographie-epci-binaire-map.csv", quote = "all")
 
+## Agriculture
+# https://stats.agriculture.gouv.fr/cartostat/
+# Statistique agricole annuelle
+
+readxl::read_xlsx(path = "data/agreste-saa-2020.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2020
+
+# Séparation des codes et des libellés
+agreste2020 %<>%
+  rename("commune_code" = Code, "commune_libelle" = Libellé) %>%
+  separate(col = "Département 2020", into = c("departement_code","departement_libelle"), sep = " - ", extra = "merge", fill = "left") %>%
+  separate(col = "Intercommunalité 2020", into = c("intercommunalite_code","intercommunalite_libelle"), sep = " - ", extra = "merge", fill = "left") %>%
+  separate(col = "Région 2020", into = c("region_code","region_libelle"), sep = " - ", extra = "merge", fill = "left") %>%
+  separate(col = "Spécialisation de la production agricole en 2020 (12 postes)", into = c("specialisation12_code","specialisation12_libelle"), sep = " - ", extra = "merge", fill = "left") %>%
+  separate(col = "Spécialisation de la production agricole en 2020 (17 postes)", into = c("specialisation17_code","specialisation17_libelle"), sep = " - ", extra = "merge", fill = "left")
+
+# Renommer les variables
+agreste2020 %<>%
+  rename("sau_evolution_2020_2010" = `SAU : évolution 2020/2010`,
+         "sau_moyenne_2020" = `SAU moyenne en 2020`,
+         "sau_moyenne_variation_absolue_2020_2010" = `SAU moyenne : variation absolue 2020-2010`,
+         "pbs_moyenne_2020" = `PBS moyenne en 2020`,
+         "pbs_evolution_2020_2010" = `PBS : évolution 2020/2010`,
+         "pbs_moyenne_evolution_2020_2010" = `PBS moyenne : évolution 2020/2010`,
+         "sau_2020" = `SAU en 2020`,
+         "sau_variation_absolue_2020_2010" = `SAU : variation absolue 2020-2010`,
+         "pbs_2020" = `PBS en 2020`, 
+         "nb_exploitation_2020" = `Nombre d'exploitations en 2020`)
+
+# Réparation de l'indicateur d'estimation
+agreste2020 %<>%
+  rename("specialisation12_estimation" = `Spécialisation de la production agricole en 2020 (12 postes)_x000d_\nestimation (*=oui)`,
+         "specialisation17_estimation" = `Spécialisation de la production agricole en 2020 (17 postes)_x000d_\nestimation (*=oui)`,
+         "sau_evolution_2020_2010_estimation" = `SAU : évolution 2020/2010_x000d_\nestimation (*=oui)`,
+         "sau_moyenne_2020_estimation" = `SAU moyenne en 2020_x000d_\nestimation (*=oui)`,
+         "sau_moyenne_variation_absolue_2020_2010_estimation" = `SAU moyenne : variation absolue 2020-2010_x000d_\nestimation (*=oui)`,
+         "pbs_moyenne_2020_estimation" = `PBS moyenne en 2020_x000d_\nestimation (*=oui)`,
+         "pbs_evolution_2020_2010_estimation" = `PBS : évolution 2020/2010_x000d_\nestimation (*=oui)`,
+         "pbs_moyenne_evolution_2020_2010_estimation" = `PBS moyenne : évolution 2020/2010_x000d_\nestimation (*=oui)`,
+         "sau_2020_estimation" = `SAU en 2020_x000d_\nestimation (*=oui)`,
+         "sau_variation_absolue_2020_2010_estimation" = `SAU : variation absolue 2020-2010_x000d_\nestimation (*=oui)`,
+         "pbs_2020_estimation" = `PBS en 2020_x000d_\nestimation (*=oui)`) 
+
+# Fonction de calcul du mode statistique
+find_mode <- function(x) {
+  u <- unique(x)
+  tab <- tabulate(match(x, u))
+  u[tab == max(tab)]
+}
+
+# Calculs valeurs de 2010
+
+agreste2020 %<>%
+  mutate(sau_2010 = sau_2020 / (1 + 0.01*sau_evolution_2020_2010),
+         pbs_2010 = pbs_2020 / (1 + 0.01*pbs_evolution_2020_2010),
+         sau_moyenne_2010 = sau_moyenne_2020 - sau_moyenne_variation_absolue_2020_2010,
+         pbs_moyenne_2010 = pbs_moyenne_2020 / (1 + 0.01*pbs_moyenne_evolution_2020_2010),
+         nb_exploitation_2010 = sau_2010 / sau_moyenne_2010) %>%
+  mutate(across(34:35, round, 0)) %>%
+  mutate(across(36:37, round, 1)) %>%
+  mutate(across(38:38, round, 0))
+  
+# Agrégation des variables au niveau de l'EPCI
+agreste2020 %>%
+  group_by(intercommunalite_code, intercommunalite_libelle) %>%
+  summarise(specialisation12_code_mode = modeest::mfv1(specialisation12_code), 
+            specialisation12_libelle_mode = modeest::mfv1(specialisation12_libelle), 
+            sau_2010_somme = sum(sau_2010),
+            sau_2020_somme = sum(sau_2020),
+            pbs_2010_somme = sum(pbs_2010),
+            pbs_2020_somme = sum(pbs_2020),
+            nb_exploitation_2010_somme = sum(nb_exploitation_2010),
+            nb_exploitation_2020_somme = sum(nb_exploitation_2020),
+            sau_variation_absolue_2020_2010_somme = sum(sau_variation_absolue_2020_2010)) -> agreste2020.epci
+
+# Calculs des variables moyennes et d'évolutions au niveau de l'EPCI
+agreste2020.epci %<>%
+  mutate(sau_moyenne_2010_somme = sau_2010_somme / nb_exploitation_2010_somme,
+         sau_moyenne_2020_somme = sau_2020_somme / nb_exploitation_2020_somme,
+         pbs_moyenne_2010_somme = sau_2010_somme / nb_exploitation_2010_somme,
+         pbs_moyenne_2020_somme = pbs_2020_somme / nb_exploitation_2020_somme,
+         sau_evolution_2020_2010_somme = (sau_2020_somme - sau_2010_somme) / sau_2010_somme,
+         pbs_evolution_2020_2010_somme = (pbs_2020_somme - pbs_2010_somme) / pbs_2010_somme,
+         sau_moyenne_evolution_2020_2010_somme = (sau_moyenne_2020_somme - sau_moyenne_2010_somme) / sau_2010_somme,
+         pbs_moyenne_evolution_2020_2010_somme = (pbs_moyenne_2020_somme - pbs_moyenne_2010_somme) / pbs_moyenne_2010_somme,
+         nb_exploitation_evolution_2020_2010_somme = (nb_exploitation_2020_somme - nb_exploitation_2010_somme) / nb_exploitation_2010_somme)
+
+# Arrondis et exprt des données
+agreste2020.epci %<>%
+  mutate(across(12:19, round, 2)) %>%
+  ungroup() %>%
+  write_excel_csv("res/agriculture-epci-data.csv", quote = "all")
+
+# Essais d'analyses factorielles
+agreste2020.epci %>%
+  column_to_rownames("intercommunalite_code") %>%
+  select(sau_evolution_2020_2010_somme, 
+         sau_moyenne_evolution_2020_2010_somme, 
+         nb_exploitation_evolution_2020_2010_somme, 
+         specialisation12_libelle_mode) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  FAMD(ncp = 5, graph = FALSE) -> agreste.famd
+
+# Questions des données manquantes
+#imputePCA(agreste2020.epci.pre, ncp = 2) -> agreste2020.epci.sansna
+#PCA(agreste2020.epci.sansna, ncp = 2, graph = FALSE) -> agreste.pca
+#) -> 
+#missMDA::imputeFAMD(agreste2020.epci.test)$completeObs -> agreste2020.epci.sansna
+#agreFAMD(ncp = 5, graph = FALSE) -> agreste.famd
+#explor(agreste.pca)
+
+# Calculs
+agreste.hcpc = HCPC(agreste.pca)
+agreste.hcpc$data.clust -> agreste.map
+
+# Exports
+agreste2020.epci %>%
+  select(intercommunalite_code, intercommunalite_libelle) -> passage
+
+agreste.map %>%
+  rownames_to_column("intercommunalite_code") %>%
+  left_join(passage) %>%
+  select(intercommunalite_code, intercommunalite_libelle, 
+       sau_evolution_2020_2010_somme, sau_moyenne_evolution_2020_2010_somme,
+       nb_exploitation_evolution_2020_2010_somme, clust) %>%
+  write_excel_csv("res/agriculture-epci-map.csv", quote = "all")
