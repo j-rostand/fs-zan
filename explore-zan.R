@@ -163,6 +163,41 @@ insee.poptot0818.rec %>%
 # https://stats.agriculture.gouv.fr/cartostat/
 # Statistique agricole annuelle
 
+# SAA 2010
+readxl::read_xlsx(path = "data/agreste-saa-2010.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2010
+
+# Séparation des codes et des libellés
+agreste2010 %<>%
+  rename("canton_code" = Code, 
+         "canton_libelle" = Libellé,
+         "nb_exploitation_2010" = `Nombre total d'exploitations, 2010`,
+         "sau_moyenne_2010" = `SAU moyenne par exploitation, 2010`,
+         "sau_moyenne_2010_estimation" = `SAU moyenne par exploitation, 2010_x000d_\nestimation (*=oui)`,
+         "pbs_moyenne_2010" = `PBS moyenne, 2010`,
+         "pbs_moyenne_2010_exploitation" = `PBS moyenne, 2010_x000d_\nestimation (*=oui)`,
+         "part_under_40_2010" = `Moins de 40 ans parmi les chefs d'exploitation et coexploitants : part en 2010`,
+         "part_under_40_2010_estimation" = `Moins de 40 ans parmi les chefs d'exploitation et coexploitants : part en 2010_x000d_\nestimation (*=oui)`) %>%
+  select(-nb_exploitation_2010)
+
+# Du canton à l'EPCI
+readxl::read_xlsx(path = "data/table-appartenance-geo-communes-2020.xlsx", skip = 5) -> codegeo2020
+
+codegeo2020 %<>%
+  select(CODGEO, CV, EPCI) %>%
+  rename("canton_code" = CV) %>%
+  left_join(agreste2010) %>%
+  group_by(EPCI) %>%
+  summarise(sau_moyenne_2010_mean = mean(sau_moyenne_2010),
+            pbs_moyenne_2010_mean = mean(pbs_moyenne_2010),
+            part_under_40_mean = mean(part_under_40_2010))
+
+# Il reste à joindre cette table à la table de la SAA 2020, 
+# puis d'unir les deux sources de données pour avoir une couverture la plus complète possible
+# au niveai de la SAU moyenne 2010 et de la PBS moyenne 2010
+# avec l'ajout de la nouvelle variable part en-dessous de 40 ans
+
+# SAA 2020
+
 readxl::read_xlsx(path = "data/agreste-saa-2020.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2020
 
 # Séparation des codes et des libellés
@@ -201,13 +236,6 @@ agreste2020 %<>%
          "sau_variation_absolue_2020_2010_estimation" = `SAU : variation absolue 2020-2010_x000d_\nestimation (*=oui)`,
          "pbs_2020_estimation" = `PBS en 2020_x000d_\nestimation (*=oui)`) 
 
-# Fonction de calcul du mode statistique
-find_mode <- function(x) {
-  u <- unique(x)
-  tab <- tabulate(match(x, u))
-  u[tab == max(tab)]
-}
-
 # Calculs valeurs de 2010
 
 agreste2020 %<>%
@@ -245,11 +273,16 @@ agreste2020.epci %<>%
          pbs_moyenne_evolution_2020_2010_somme = (pbs_moyenne_2020_somme - pbs_moyenne_2010_somme) / pbs_moyenne_2010_somme,
          nb_exploitation_evolution_2020_2010_somme = (nb_exploitation_2020_somme - nb_exploitation_2010_somme) / nb_exploitation_2010_somme)
 
+
+
 # Arrondis et exprt des données
-agreste2020.epci %<>%
-  mutate(across(12:19, round, 2)) %>%
-  ungroup() %>%
-  write_excel_csv("res/agriculture-epci-data.csv", quote = "all")
+#agreste2020.epci %<>%
+#  mutate(across(12:19, round, 2)) %>%
+#  ungroup() %>%
+#  write_excel_csv("res/agriculture-epci-data.csv", quote = "all")
+
+agreste2020.epci %>%
+  stat.desc()
 
 # Essais d'analyses factorielles
 agreste2020.epci %>%
