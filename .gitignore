@@ -91,3 +91,9 @@ Temporary Items
 
 # PNG
 *.png
+
+# Cartes
+./cartes/artificialisation/carte-categories-artifcialisation.png
+./cartes/artificialisation/categories-artificialisation.png
+./cartes/demographie/croissance-deprise.png
+
