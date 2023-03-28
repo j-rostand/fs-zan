@@ -7,7 +7,7 @@ Préparation et exploration des données d'artificialisation des sols, de démog
 Ce projet contient deux programmes distincts : 
 
 1. Le fichier `explore-zan.R` propose une exploration des données d'artificialisation des sols, de démographie et de situation agraire au niveau des EPCI, qui peut être utilisé à des fins d'essais d'analyses croisées ;
-2. Les fichiers `artificialisation-epci.R`, `demographie-EPCI` et `artificialisation-EPCI` contiennent les instructions nécessaires à l'obtention de fichiers de données normalisés au niveau de l'EPCI, sur des périodes de dix années, qui peuvent être servir de référence pour l'analyse de chacune de ces thématiques.
+2. Les fichiers `artificialisation-epci.R`, `demographie-EPCI.R` et `artificialisation-EPCI.R` contiennent les instructions nécessaires à l'obtention de fichiers de données normalisés au niveau de l'EPCI, sur des périodes de dix années, qui peuvent être servir de référence pour l'analyse de chacune de ces thématiques.
 
 ## Sources et données
 
