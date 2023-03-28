@@ -1,6 +1,13 @@
 # Soutenabilités x Territoires : le Zéro Artificialisation Nette (ZAN)
 
-Analyse des données d'artificialisation des sols et de démographie, menée dans le cadre de France Stratégie.
+Préparation et exploration des données d'artificialisation des sols, de démographie et de situation agraire au niveau des EPCI dans le cadre de la mission de France Stratégie sur l'objectif Zéro Artificialisation Nette (ZAN).
+
+## Utilisation
+
+Ce projet contient deux programmes distincts : 
+
+1. Le fichier `explore-zan.R` propose une exploration des données d'artificialisation des sols, de démographie et de situation agraire au niveau des EPCI, qui peut être utilisé à des fins d'essais d'analyses croisées ;
+2. Les fichiers `artificialisation-epci.R`, `demographie-EPCI` et `artificialisation-EPCI` contiennent les instructions nécessaires à l'obtention de fichiers de données normalisés au niveau de l'EPCI, sur des périodes de dix années, qui peuvent être servir de référence pour l'analyse de chacune de ces thématiques.
 
 ## Sources et données
 

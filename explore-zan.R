@@ -273,7 +273,18 @@ agreste2020.epci %<>%
          pbs_moyenne_evolution_2020_2010_somme = (pbs_moyenne_2020_somme - pbs_moyenne_2010_somme) / pbs_moyenne_2010_somme,
          nb_exploitation_evolution_2020_2010_somme = (nb_exploitation_2020_somme - nb_exploitation_2010_somme) / nb_exploitation_2010_somme)
 
+# Jointure
 
+agreste2020.epci %<>%
+  left_join(codegeo2020, by = c("intercommunalite_code" = "EPCI"))
+
+# Calculs complémentaires
+
+agreste2020.epci$sau_moyenne_evolution_2020_2010_mean = agreste2020.epci$sau_moyenne_2020_somme - 
+  agreste2020.epci$sau_moyenne_2010_mean
+
+agreste2020.epci$pbs_moyenne_evolution_2020_2010_mean = agreste2020.epci$pbs_moyenne_2020_somme - 
+  agreste2020.epci$pbs_moyenne_2010_mean
 
 # Arrondis et exprt des données
 #agreste2020.epci %<>%
@@ -287,12 +298,11 @@ agreste2020.epci %>%
 # Essais d'analyses factorielles
 agreste2020.epci %>%
   column_to_rownames("intercommunalite_code") %>%
-  select(sau_evolution_2020_2010_somme, 
-         sau_moyenne_evolution_2020_2010_somme, 
-         nb_exploitation_evolution_2020_2010_somme, 
-         specialisation12_libelle_mode) %>%
+  select(sau_moyenne_evolution_2020_2010_mean,
+         pbs_2020_somme,
+         part_under_40_mean) %>%
   filter_all(all_vars(!is.na(.))) %>%
-  FAMD(ncp = 5, graph = FALSE) -> agreste.famd
+  PCA(ncp = 5, graph = FALSE) -> agreste.pca
 
 # Questions des données manquantes
 #imputePCA(agreste2020.epci.pre, ncp = 2) -> agreste2020.epci.sansna
@@ -313,7 +323,4 @@ agreste2020.epci %>%
 agreste.map %>%
   rownames_to_column("intercommunalite_code") %>%
   left_join(passage) %>%
-  select(intercommunalite_code, intercommunalite_libelle, 
-       sau_evolution_2020_2010_somme, sau_moyenne_evolution_2020_2010_somme,
-       nb_exploitation_evolution_2020_2010_somme, clust) %>%
-  write_excel_csv("res/agriculture-epci-map.csv", quote = "all")
+  write_excel_csv("res/agriculture-epci-map-2.csv", quote = "all")
