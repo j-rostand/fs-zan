@@ -48,6 +48,10 @@ artif$artinc1121 = artif$art11inc12 + artif$art12inc13 + artif$art13inc14 +
   artif$art14inc15 + artif$art15inc16 + artif$art16inc17 + artif$art17inc18 + 
   artif$art18inc19 + artif$art19inc20 + artif$art19inc20 + artif$art20inc21
 
+# Export par communes
+artif %>% 
+  write_excel_csv("res/artificialisation-communes-2011-2021.csv", quote = "all")
+
 # Regroupement par EPCI
 artif %>%
   group_by(epci21, epci21txt) %>%
@@ -61,3 +65,17 @@ artif %>%
 
 artif.epci %>% 
   write_excel_csv("res/artificialisation-epci-2011-2021.csv", quote = "all")
+
+# Regroupement par SCOT
+artif %>%
+  group_by(scot) %>%
+  summarise(nafart1121_tot = sum(nafart1121), 
+            artact1121_tot = sum(artact1121), 
+            arthab1121_tot = sum(arthab1121), 
+            artmix1121_tot = sum(artmix1121),
+            artinc1121_tot = sum(artinc1121), 
+            artcom2020_tot = sum(artcom2020 * surfcom2021) / sum(surfcom2021),
+            surfcom2021_tot = sum(surfcom2021)) -> artif.scot
+
+artif.scot %>% 
+  write_excel_csv("res/artificialisation-scot-2011-2021.csv", quote = "all")
