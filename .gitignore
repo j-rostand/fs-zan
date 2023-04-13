@@ -89,8 +89,9 @@ Temporary Items
 # PDF
 *.pdf
 
-# PNG
+# PNG / JPG
 *.png
+*.jpg
 
 # Cartes
 ./cartes/artificialisation/carte-categories-artifcialisation.png

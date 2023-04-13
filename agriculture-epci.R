@@ -54,7 +54,7 @@ agreste2020 %<>%
   separate(col = "Spécialisation de la production agricole en 2020 (12 postes)", into = c("specialisation12_code","specialisation12_libelle"), sep = " - ", extra = "merge", fill = "left") %>%
   separate(col = "Spécialisation de la production agricole en 2020 (17 postes)", into = c("specialisation17_code","specialisation17_libelle"), sep = " - ", extra = "merge", fill = "left")
 
-# Renommer les variables
+# Renommer les variables et réparation de l'indicateur d'estimation
 agreste2020 %<>%
   rename("sau_evolution_2020_2010" = `SAU : évolution 2020/2010`,
          "sau_moyenne_2020" = `SAU moyenne en 2020`,
@@ -65,10 +65,7 @@ agreste2020 %<>%
          "sau_2020" = `SAU en 2020`,
          "sau_variation_absolue_2020_2010" = `SAU : variation absolue 2020-2010`,
          "pbs_2020" = `PBS en 2020`, 
-         "nb_exploitation_2020" = `Nombre d'exploitations en 2020`)
-
-# Réparation de l'indicateur d'estimation
-agreste2020 %<>%
+         "nb_exploitation_2020" = `Nombre d'exploitations en 2020`) %>%
   rename("specialisation12_estimation" = `Spécialisation de la production agricole en 2020 (12 postes)_x000d_\nestimation (*=oui)`,
          "specialisation17_estimation" = `Spécialisation de la production agricole en 2020 (17 postes)_x000d_\nestimation (*=oui)`,
          "sau_evolution_2020_2010_estimation" = `SAU : évolution 2020/2010_x000d_\nestimation (*=oui)`,
@@ -106,7 +103,7 @@ agreste2020 %>%
             nb_exploitation_2020_somme = sum(nb_exploitation_2020),
             sau_variation_absolue_2020_2010_somme = sum(sau_variation_absolue_2020_2010)) -> agreste2020.epci
 
-# Calculs des variables moyennes et d'évolutions au niveau de l'EPCI
+# Calculs des variables moyennes et d'évolutions au niveau de l'EPCI ; jointure
 agreste2020.epci %<>%
   mutate(sau_moyenne_2010_somme = sau_2010_somme / nb_exploitation_2010_somme,
          sau_moyenne_2020_somme = sau_2020_somme / nb_exploitation_2020_somme,
@@ -116,11 +113,7 @@ agreste2020.epci %<>%
          pbs_evolution_2020_2010_somme = (pbs_2020_somme - pbs_2010_somme) / pbs_2010_somme,
          sau_moyenne_evolution_2020_2010_somme = (sau_moyenne_2020_somme - sau_moyenne_2010_somme) / sau_2010_somme,
          pbs_moyenne_evolution_2020_2010_somme = (pbs_moyenne_2020_somme - pbs_moyenne_2010_somme) / pbs_moyenne_2010_somme,
-         nb_exploitation_evolution_2020_2010_somme = (nb_exploitation_2020_somme - nb_exploitation_2010_somme) / nb_exploitation_2010_somme)
-
-# Jointure
-
-agreste2020.epci %<>%
+         nb_exploitation_evolution_2020_2010_somme = (nb_exploitation_2020_somme - nb_exploitation_2010_somme) / nb_exploitation_2010_somme) %>%
   left_join(codegeo2020, by = c("intercommunalite_code" = "EPCI"))
 
 # Calculs complémentaires
@@ -131,8 +124,12 @@ agreste2020.epci$sau_moyenne_evolution_2020_2010_mean = agreste2020.epci$sau_moy
 agreste2020.epci$pbs_moyenne_evolution_2020_2010_mean = agreste2020.epci$pbs_moyenne_2020_somme - 
   agreste2020.epci$pbs_moyenne_2010_mean
 
+agreste2020.epci$pbs_moyenne_evolution_2020_2010_mean = agreste2020.epci$pbs_moyenne_2020_somme - 
+  agreste2020.epci$pbs_moyenne_2010_mean
+
 # Arrondis et export des données
-agreste2020.epci %<>%
-  mutate(across(12:25, round, 2)) %>%
+agreste2020.epci %>%
+  rename("epci21" = `intercommunalite_code`, "epci21txt" = `intercommunalite_libelle`) %>%
+  mutate(across(12:24, round, 2)) %>%
   ungroup() %>%
   write_excel_csv("res/agriculture-epci-2010-2020.csv", quote = "all")
