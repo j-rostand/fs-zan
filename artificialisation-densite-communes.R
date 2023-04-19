@@ -91,7 +91,7 @@ territoires1 %>%
         axis.title.y = element_text(size = 8),
         plot.title = element_text(size=10, hjust = 0.5, face="bold")) +
   labs(title="Taux de croissance annuel moyen du nombre de ménages sur la période 2008_2018, en fonction de la densité communale",
-       x ="", y = "en %") 
+       x ="", y = "en %")
 
 # Moyennes des variables en fonction de la densité
 

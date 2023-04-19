@@ -73,6 +73,7 @@ Temporary Items
 *.xlsx
 *.xls
 *.csv
+*.txt
 
 # QGIS
 
