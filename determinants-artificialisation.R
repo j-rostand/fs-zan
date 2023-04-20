@@ -6,6 +6,8 @@
 
 # Bibliothèques
 library(tidyverse)
+library(explor)
+library(FactoMineR)
 
 # https://www.insee.fr/fr/information/6051727
 read_csv(file = "data/commune_2022.csv") %>%
@@ -16,6 +18,13 @@ read_csv(file = "data/commune_2022.csv") %>%
 readxl::read_xlsx(path = "data/base-cc-tourisme-2023-geo2022.xlsx", skip = 5) %>%
   select(CODGEO, RTLIT23) %>%
   rename(lits_tourisme_2023 = "RTLIT23") -> insee.tourisme
+
+# https://www.observatoire-des-territoires.gouv.fr/population-au-dernier-recensement
+readxl::read_xlsx(path = "data/insee_rp_hist_1968.xlsx", skip = 4) %>%
+  filter(an == "2019") %>%
+  select(codgeo, p_pop) %>%
+  rename("CODGEO" = codgeo, 
+         "pop2019" = p_pop) -> insee.pop2019
 
 # JR
 readxl::read_xlsx(path = "data/agreste-saa-2020.xlsx", skip = 3, na = "N/A - division par 0") %>%
@@ -48,10 +57,38 @@ readxl::read_xlsx(path = "data/indic_sex_rp.xlsx", skip = 4) %>%
   rename("CODGEO" = codgeo, 
          "part_csp_cadres_intellectuelles_2019" = p_csp_cadpis) -> insee.csp2019
 
+# LN
+read_delim(file = "data/logement.txt",
+           delim = " ", col_names = TRUE, col_types = c("ccdddd")) %>%
+  select(codeinsee, evollog0819, evolsec0819, partlogvacant, partproprios) %>%
+  rename("CODGEO" = codeinsee) -> insee.logement
+
+read_csv(file = "res/artificialisation-communes-2011-2021.csv", 
+         col_types = "cc") %>%
+  select(idcom, artcom2020, nafart1121) %>%
+  rename("CODGEO" = idcom)-> onas.communes
+
 insee.communes22 %>%
   left_join(insee.tourisme, by = "CODGEO") %>%
+  left_join(insee.pop2019, by = "CODGEO") %>%
   left_join(agreste2020, by = "CODGEO") %>%
   left_join(filosofi.revenu2020, by = "CODGEO") %>%
   left_join(insee.menages0919, by = "CODGEO") %>%
   left_join(insee.emploi1121, by = "CODGEO") %>% 
+  left_join(insee.logement, by = "CODGEO") %>% 
+  left_join(onas.communes, by = "CODGEO") %>% 
   left_join(insee.csp2019, by = "CODGEO") -> determinants.artificialisation
+
+determinants.artificialisation %>%
+  write_excel_csv("res/determinants-artificialisation.csv", quote = "all")
+
+determinants.artificialisation %>%
+  mutate(part_lits_tourisme_2023 = lits_tourisme_2023 / pop2019) %>%
+  select(-CODGEO, -LIBGEO, -pop2019, -lits_tourisme_2023) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  PCA(ncp = 5, graph = FALSE, quanti.sup = c("artifhab", "act1121", "artcom2020", "nafart1121")) -> res.pca
+
+explor(res.pca)
+
+summary(res.pca)
+
