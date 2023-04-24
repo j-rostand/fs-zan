@@ -11,7 +11,7 @@ library(FactoMineR)
 
 # https://www.insee.fr/fr/information/6051727
 read_csv(file = "data/commune_2022.csv") %>%
-  select(COM, LIBELLE) %>%
+  select(COM, DEP, LIBELLE) %>%
   rename("CODGEO" = COM, "LIBGEO" = LIBELLE) -> insee.communes22
 
 # https://www.insee.fr/fr/statistiques/2021703#consulter
@@ -58,12 +58,22 @@ read_delim(file = "data/empsal.txt",
 #   rename("CODGEO" = codgeo, 
 #          "part_csp_cadres_intellectuelles_2019" = p_csp_cadpis) -> insee.csp2019
 
+# Ensoleillement
+# https://www.linternaute.com/voyage/climat/classement/departements/soleil
+readxl::read_xlsx(path = "data/ensoleillement.xlsx", skip = 1) %>%
+  select(iddep, heures_soleil_2022) %>%
+  rename("DEP" = iddep) -> internaute.soleil
+
 # LN
 # part des proprios redondante avec le revenue
-read_delim(file = "data/logement.txt",
-           delim = " ", col_names = TRUE, col_types = c("ccdddd")) %>%
+read_delim(file = "data/logement.txt", col_types = c("ccdddd")) %>%
   select(codeinsee, evollog0819, evolsec0819, partlogvacant) %>%
   rename("CODGEO" = codeinsee) -> insee.logement
+
+# evollog019 est restrient aux seumes résidences principales
+read_csv(file = "data/logement1.csv", col_types = c("ccdddd")) %>%
+  select(codeinsee, evollog0819, evolsec0819, partlogvacant) %>%
+  rename("CODGEO" = codeinsee) -> insee.logement1
 
 # LN
 read_delim(file = "data/valeurimmo.txt",
@@ -93,9 +103,11 @@ insee.communes22 %>%
   left_join(insee.logement, by = "CODGEO") %>% 
   left_join(insee.immobilier, by = "CODGEO") %>%
   left_join(insee.densite2023, by = "CODGEO") %>%
+  right_join(internaute.soleil, by = "DEP") %>%
   left_join(onas.communes, by = "CODGEO") -> determinants.artificialisation
 
 determinants.artificialisation %<>%
+  filter_at(vars(starts_with("artifh")), any_vars(. != 0)) %>%
   mutate(part_lits_tourisme_2023 = lits_tourisme_2023 / pop2019,
          artif_efficacite_habitat = men0919 / artifhab,
          artif_efficacite_activite = emp1121 / act1121) %>%
@@ -103,7 +115,7 @@ determinants.artificialisation %<>%
   write_excel_csv("res/determinants-artificialisation.csv", quote = "all")
 
 determinants.artificialisation %>%
-  select(-CODGEO, -LIBGEO, -artif_efficacite_habitat, -artif_efficacite_activite) %>%
+  select(-CODGEO, -LIBGEO, -artif_efficacite_habitat, -artif_efficacite_activite, -DEP) %>%
   filter_all(all_vars(!is.na(.))) %>%
   PCA(ncp = 5, graph = FALSE, 
       quanti.sup = c("artcom2020", "nafart1121"), 
