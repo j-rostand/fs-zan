@@ -14,8 +14,8 @@ library(tidyverse)
 
 # SAA 2010 et 2020
 # https://stats.agriculture.gouv.fr/cartostat/
-readxl::read_xlsx(path = "data/agreste-saa-2010.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2010
-readxl::read_xlsx(path = "data/agreste-saa-2020.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2020
+readxl::read_xlsx(path = "./../data/agreste-saa-2010.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2010
+readxl::read_xlsx(path = "./../data/agreste-saa-2020.xlsx", skip = 3, na = "N/A - division par 0") -> agreste2020
 
 ###################
 ### TRAITEMENTS ###
@@ -35,7 +35,7 @@ agreste2010 %<>%
   select(-nb_exploitation_2010)
 
 # Du canton à l'EPCI
-readxl::read_xlsx(path = "data/table-appartenance-geo-communes-2020.xlsx", skip = 5) -> codegeo2020
+readxl::read_xlsx(path = "./../data/table-appartenance-geo-communes-2020.xlsx", skip = 5) -> codegeo2020
 
 codegeo2020 %<>%
   select(CODGEO, CV, EPCI) %>%
@@ -134,4 +134,4 @@ agreste2020.epci %>%
   rename("epci21" = `intercommunalite_code`, "epci21txt" = `intercommunalite_libelle`) %>%
   mutate(across(12:24, round, 2)) %>%
   ungroup() %>%
-  write_excel_csv("res/agriculture-epci-2010-2020.csv", quote = "all")
+  write_excel_csv("./../res/agriculture-epci-2010-2020.csv", quote = "all")

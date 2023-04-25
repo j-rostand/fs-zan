@@ -15,9 +15,9 @@ library(tidyverse)
 # Import des données démographiques de l'Insee (Observatoire des Territoires)
 # https://www.observatoire-des-territoires.gouv.fr/visiotheque/2017-dynpop-typologie-de-levolution-de-la-population-entre-1999-et-2013
 
-readxl::read_xlsx(path = "data/insee_rp_evol_1968_var_pop.xlsx", skip = 4) -> insee.varpop
-readxl::read_xlsx(path = "data/insee_rp_evol_1968_sn_brut.xlsx", skip = 4) -> insee.soldenat
-readxl::read_xlsx(path = "data/insee_rp_evol_1968_sm_brut.xlsx", skip = 4) -> insee.soldemig
+readxl::read_xlsx(path = "./../data/insee_rp_evol_1968_var_pop.xlsx", skip = 4) -> insee.varpop
+readxl::read_xlsx(path = "./../data/insee_rp_evol_1968_sn_brut.xlsx", skip = 4) -> insee.soldenat
+readxl::read_xlsx(path = "./../data/insee_rp_evol_1968_sm_brut.xlsx", skip = 4) -> insee.soldemig
 
 ###################
 ### TRAITEMENTS ###
@@ -57,4 +57,4 @@ insee.poptot0818 %>%
 ##############
 
 insee.poptot0818.rec %>%
-  write_excel_csv("res/demographie-epci-2008-2018.csv", quote = "all")
+  write_excel_csv("./../res/demographie-epci-2008-2018.csv", quote = "all")

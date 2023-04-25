@@ -15,7 +15,7 @@ library(pastecs)
 
 # Import des données de l'Observatoire de l'artificialisation des sols
 # https://cerema.app.box.com/v/pnb-action7-indicateurs-ff
-read_delim(file = "data/obs_artif_conso_com_2009_2021.csv",
+read_delim(file = "./../data/obs_artif_conso_com_2009_2021.csv",
            delim = ";", 
            escape_double = FALSE,
            trim_ws = TRUE) -> artif
@@ -81,10 +81,10 @@ artif %>%
 
 # Export par communes
 artif %>% 
-  write_excel_csv("res/artificialisation-communes-2011-2021.csv", quote = "all")
+  write_excel_csv("./../res/artificialisation-communes-2011-2021.csv", quote = "all")
 # Export par EPCI
 artif.epci %>% 
-  write_excel_csv("res/artificialisation-epci-2011-2021.csv", quote = "all")
+  write_excel_csv("./../res/artificialisation-epci-2011-2021.csv", quote = "all")
 # Export par SCOT
 artif.scot %>% 
-  write_excel_csv("res/artificialisation-scot-2011-2021.csv", quote = "all")
+  write_excel_csv("./../res/artificialisation-scot-2011-2021.csv", quote = "all")

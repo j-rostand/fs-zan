@@ -14,13 +14,13 @@ library(ggplot2)
 ###############
 
 # https://www.insee.fr/fr/statistiques/5395965
-readxl::read_xlsx(path = "data/base-cc-serie-historique-2018.xlsx", 
+readxl::read_xlsx(path = "./../data/base-cc-serie-historique-2018.xlsx", 
                   skip = 5, na = "N/A - résultat non disponible") -> insee_recensement_2018
 # https://www.insee.fr/fr/statistiques/fichier/6439600/grille_densite_7_niveaux_detaille_2023.xlsx
-readxl::read_xlsx(path = "data/grille_densite_7_niveaux_detaille_2023.xlsx", 
+readxl::read_xlsx(path = "./../data/grille_densite_7_niveaux_detaille_2023.xlsx", 
                   skip = 1) -> insee_grille_densite_2023
 # Fichier de l'Observatoire nationak, tel que transformé par le script artificialisation-flux.R
-read_csv(file = "res/artificialisation-communes-2011-2021.csv", 
+read_csv(file = "./../res/artificialisation-communes-2011-2021.csv", 
          col_types = "cc") -> artificialisation_communes_2021
 
 ###################
@@ -122,6 +122,6 @@ territoires1 %>%
   mutate(across(2:4, round, 1)) %>%
   mutate(across(5:7, round, 4)) %>%
   mutate(across(8:8, round, 1)) %>%
-  write.csv(file = "res/artificialisation-moyennes-densite-communale.csv")
+  write.csv(file = "./../res/artificialisation-moyennes-densite-communale.csv")
 
   
