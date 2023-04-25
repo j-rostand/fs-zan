@@ -1,15 +1,15 @@
 # Mission sur le Zéro Artificialisation Nette (ZAN)
 
-Dans le cadre de la mission sur l'objectif Zéro Artificialisation Nette (ZAN), réalisée à France Stratégie à la suite du rapport [Soutenabilités!](https://www.strategie.gouv.fr/publications/soutenabilites-orchestrer-planifier-laction-publique), ce dossier contient les programmes d'analyse et de traitements de données sur les niveaux, la répartition et les déterminants de la consommation d'espaces naturels, agricoles et forestiers (ENAF) au sens des fichiers fonciers.
+Dans le cadre de la mission sur l'objectif Zéro Artificialisation Nette (ZAN), réalisée à France Stratégie à la suite du rapport *[Soutenabilités!](https://www.strategie.gouv.fr/publications/soutenabilites-orchestrer-planifier-laction-publique)*, ce dossier contient les programmes d'analyse et de traitements de données sur les niveaux, la répartition et les déterminants de la consommation d'espaces naturels, agricoles et forestiers (ENAF) au sens des fichiers fonciers.
 
 ## Utilisation
 
 Au sein du dossier `script`, les programmes suivants permettent : 
 
 - S'agissant des scripts `agriculture-EPCI.R` et `demographie-EPCI.R`, d'obtenir un tableau de données contenant les évolutions des variables d'intérêt sur une période de référence de dix ans au niveau de l'EPCI ;
-- S'agissant du fichier `artificialisaiton-flux.R`, de calculer les différents flux d'artificialisation sur une période de dix ans, au niveau de la commune, de l'EPCI et du SCOT ;
+- S'agissant du fichier `artificialisation-flux.R`, de calculer les différents flux d'artificialisation sur une période de dix ans, au niveau de la commune, de l'EPCI et du SCOT ;
 - S'agissant du programme `artificialisation-repartition.R`, de réaliser des graphiques représentant la répartition des flux d'artificialisation selon le niveau de densité des communes ;
-- Enfin, s'agissant du programme `artificialisation-determinants`, de mener une analyse en composantes principales sur les déterminants le niveau d'artificialisation.
+- Enfin, s'agissant du programme `artificialisation-determinants.R`, de mener une analyse en composantes principales sur les déterminants le niveau d'artificialisation.
 
 ## Sources et données
 
@@ -45,8 +45,13 @@ Ces données sont issues de sources publiques accessibles en ligne :
 - [Table d’appartenance géographique des communes et tables de passage](https://www.insee.fr/fr/information/2028028), réalisée par l'Insee ;
 - [Le recensement de la population (base des principaux indicateurs) issues des séries historiques en 2018](https://www.insee.fr/fr/statistiques/5395965), publié par l'Insee ;
 - [La grille de densité des communes en 2023](https://www.insee.fr/fr/statistiques/fichier/6439600/grille_densite_7_niveaux_detaille_2023.xlsx
-), réalisée par l'Insee.
+), réalisée par l'Insee ;
+- [La liste des communes françaises](https://www.insee.fr/fr/information/6051727), produite par l'Insee ;
+- [Le nombre de lits touristiques par commune](https://www.insee.fr/fr/statistiques/2021703), tel qu'identifié par l'Insee ;
+- [La population communale au dernier recensement](https://www.observatoire-des-territoires.gouv.fr/population-au-dernier-recensement), également par l'Insee ;
+- [La médiane du revenu par unité de consommation](https://www.observatoire-des-territoires.gouv.fr/mediane-du-revenu-disponible-par-uc), issu du Filosofi ;
+- [Les niveaux d'ensoleillement des départements français en 2022](https://www.linternaute.com/voyage/climat/classement/departements/soleil), tels que compilés par l'Internaute à partir des données Météo-France.
 
 ## Crédits
 
-Ce travail a été réalisé en collaboration étroite avec Hélène Arambourou, au sein de l'équipe-projet ZAN, 
+Ce travail a été réalisé en collaboration étroite avec Hélène Arambourou, au sein de l'équipe-projet ZAN. 
