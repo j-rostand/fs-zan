@@ -2,14 +2,16 @@
 # Jules Rostand
 
 # Description
-# Ce script R propose une analyse de la répartition de l'artificialisation en fonction de la 
-# grille de densité communale de l'Insee
+# Ce script R propose une analyse de la répartition de l'artificialisation 
+# selon grille de densité communale de l'Insee
 
 # Bibliothèques
 library(tidyverse)
 library(ggplot2)
 
-# Sources
+###############
+### SOURCES ###
+###############
 
 # https://www.insee.fr/fr/statistiques/5395965
 readxl::read_xlsx(path = "data/base-cc-serie-historique-2018.xlsx", 
@@ -17,9 +19,13 @@ readxl::read_xlsx(path = "data/base-cc-serie-historique-2018.xlsx",
 # https://www.insee.fr/fr/statistiques/fichier/6439600/grille_densite_7_niveaux_detaille_2023.xlsx
 readxl::read_xlsx(path = "data/grille_densite_7_niveaux_detaille_2023.xlsx", 
                   skip = 1) -> insee_grille_densite_2023
-# Fichier de l'Observatoire, transformé par le script artificialisation 
+# Fichier de l'Observatoire nationak, tel que transformé par le script artificialisation-flux.R
 read_csv(file = "res/artificialisation-communes-2011-2021.csv", 
          col_types = "cc") -> artificialisation_communes_2021
+
+###################
+### TRAITEMENTS ###
+###################
 
 # Jointures
 insee_grille_densite_2023 %>%
@@ -44,6 +50,10 @@ territoires1$libdens <- factor(territoires1$libdens, levels = c("Rural à habita
 # Statistiques descriptive sur les variables, utiles pour vérifier la déformation liée à la
 # représentation graphique
 tapply(territoires1$artcom2020, territoires1$libdens, FUN = summary) 
+
+##################
+### GRAPHIQUES ###
+##################
 
 # Surface communale artificialisé sur la période
 territoires1 %>% 
@@ -93,8 +103,11 @@ territoires1 %>%
   labs(title="Taux de croissance annuel moyen du nombre de ménages sur la période 2008_2018, en fonction de la densité communale",
        x ="", y = "en %")
 
-# Moyennes des variables en fonction de la densité
+##############
+### EXPORT ###
+##############
 
+# Tableau des moyennes des variables de l'artificialisation en fonction de la densité communale
 territoires1 %>%
   droplevels() %>%
   drop_na() %>%
@@ -109,6 +122,6 @@ territoires1 %>%
   mutate(across(2:4, round, 1)) %>%
   mutate(across(5:7, round, 4)) %>%
   mutate(across(8:8, round, 1)) %>%
-  write.csv(file = "res/artificialisation_densite_communes_moyenne.csv")
+  write.csv(file = "res/artificialisation-moyennes-densite-communale.csv")
 
   

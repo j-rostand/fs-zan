@@ -2,22 +2,26 @@
 # Jules Rostand
 
 # Description
-# Ce script R propose une classificiation de la tendance démographique sur la période 2008-2018
-# au niveau de l'EPCI à partir des données de l'Insee
+# Ce script R propose une classificiation simple de la tendance démographique 
+# au niveau de l'EPCI sur la période 2008-2018, à partir des données de l'Insee
 
 # Bibliothèques
 library(tidyverse)
 
-###########################################
-## Préparation des données : démographie ##
-###########################################
+###############
+### SOURCES ###
+###############
 
-# Import des données démographiques de l'Insee, mises à disposition par l'Observatoire des Territoires de l'ANCT
+# Import des données démographiques de l'Insee (Observatoire des Territoires)
 # https://www.observatoire-des-territoires.gouv.fr/visiotheque/2017-dynpop-typologie-de-levolution-de-la-population-entre-1999-et-2013
 
 readxl::read_xlsx(path = "data/insee_rp_evol_1968_var_pop.xlsx", skip = 4) -> insee.varpop
 readxl::read_xlsx(path = "data/insee_rp_evol_1968_sn_brut.xlsx", skip = 4) -> insee.soldenat
 readxl::read_xlsx(path = "data/insee_rp_evol_1968_sm_brut.xlsx", skip = 4) -> insee.soldemig
+
+###################
+### TRAITEMENTS ###
+###################
 
 insee.varpop %>%
   left_join(insee.soldenat) %>%
@@ -47,6 +51,10 @@ insee.poptot0818 %>%
                            varpop0818_rec == 0 & sn_brut0818_rec == 0 & sm_brut0818_rec == 1 ~ "Décroissance liée à un solde naturel négatif",
                            varpop0818_rec == 0 & sn_brut0818_rec == 0 & sm_brut0818_rec == 0 ~ "Décroissance totale")) %>%
   select(epci21, epci21txt, clust, varpop0818, sn_brut0818, sm_brut0818) -> insee.poptot0818.rec
+
+##############
+### EXPORT ###
+##############
 
 insee.poptot0818.rec %>%
   write_excel_csv("res/demographie-epci-2008-2018.csv", quote = "all")

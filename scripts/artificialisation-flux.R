@@ -9,15 +9,20 @@
 library(tidyverse)
 library(pastecs)
 
-#################################################
-## Préparation des données : artificialisation ##
-#################################################
+###############
+### SOURCES ###
+###############
 
-# Import des données de l'observatoire de l'artificialisation des sols
+# Import des données de l'Observatoire de l'artificialisation des sols
+# https://cerema.app.box.com/v/pnb-action7-indicateurs-ff
 read_delim(file = "data/obs_artif_conso_com_2009_2021.csv",
            delim = ";", 
            escape_double = FALSE,
            trim_ws = TRUE) -> artif
+
+###################
+### TRAITEMENTS ###
+###################
 
 stat.desc(artif[73:77]) # 5 variables de flux d'artificialisation 2009-2021
 
@@ -48,10 +53,6 @@ artif$artinc1121 = artif$art11inc12 + artif$art12inc13 + artif$art13inc14 +
   artif$art14inc15 + artif$art15inc16 + artif$art16inc17 + artif$art17inc18 + 
   artif$art18inc19 + artif$art19inc20 + artif$art19inc20 + artif$art20inc21
 
-# Export par communes
-artif %>% 
-  write_excel_csv("res/artificialisation-communes-2011-2021.csv", quote = "all")
-
 # Regroupement par EPCI
 artif %>%
   group_by(epci21, epci21txt) %>%
@@ -62,9 +63,6 @@ artif %>%
             artinc1121_tot = sum(artinc1121), 
             artcom2020_tot = sum(artcom2020 * surfcom2021) / sum(surfcom2021),
             surfcom2021_tot = sum(surfcom2021)) -> artif.epci
-
-artif.epci %>% 
-  write_excel_csv("res/artificialisation-epci-2011-2021.csv", quote = "all")
 
 # Regroupement par SCOT
 artif %>%
@@ -77,5 +75,16 @@ artif %>%
             artcom2020_tot = sum(artcom2020 * surfcom2021) / sum(surfcom2021),
             surfcom2021_tot = sum(surfcom2021)) -> artif.scot
 
+##############
+### EXPORT ###
+##############
+
+# Export par communes
+artif %>% 
+  write_excel_csv("res/artificialisation-communes-2011-2021.csv", quote = "all")
+# Export par EPCI
+artif.epci %>% 
+  write_excel_csv("res/artificialisation-epci-2011-2021.csv", quote = "all")
+# Export par SCOT
 artif.scot %>% 
   write_excel_csv("res/artificialisation-scot-2011-2021.csv", quote = "all")

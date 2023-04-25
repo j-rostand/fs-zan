@@ -2,7 +2,8 @@
 # Jules Rostand
 
 # Description
-# Ce script R propose une ACP des déterminants de l'artificialisation des sols au niveau de la commune
+# Ce script R propose une analyse en composantes principales d'un ensemble de
+# déterminants de l'artificialisation des sols au niveau de la commune
 
 # Bibliothèques
 library(tidyverse)
