@@ -57,7 +57,7 @@ read_delim(file = "data/efficacitehab.txt",
   select(codeinsee, men0919, artifhab) %>%
   rename("CODGEO" = codeinsee) -> insee.menages0919
 
-# Evolution du nombre d'emplois etartificialisation liée à l'activité
+# Evolution du nombre d'emplois et artificialisation liée à l'activité
 # LN
 read_delim(file = "data/empsal.txt",
            delim = " ", col_names = TRUE, col_types = c("ccdd")) %>%
