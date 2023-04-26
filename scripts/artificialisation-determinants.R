@@ -16,7 +16,7 @@ library(FactoMineR)
 
 # Nom et identifiant des communes françaises
 # https://www.insee.fr/fr/information/6051727
-read_csv(file = "./.././../data/commune_2022.csv") %>%
+read_csv(file = "./../data/commune_2022.csv") %>%
   select(COM, DEP, LIBELLE) %>%
   rename("CODGEO" = COM, "LIBGEO" = LIBELLE) -> insee.communes22
 
@@ -84,9 +84,10 @@ readxl::read_xlsx(path = "./../data/ensoleillement.xlsx", skip = 1) %>%
 # avec la part des logements vacants
 # LN
 # part des proprios redondante avec le revenue
-read_csv(file = "./../data/logement1.csv", col_types = c("ccdddd")) %>%
-  select(codeinsee, evollog0819, evolsec0819, partlogvacant) %>%
-  rename("CODGEO" = codeinsee) -> insee.logement1
+read_delim(file = "./../data/logement0919.txt", delim = " ", 
+           col_names = TRUE, col_types = c("ccdddd")) %>%
+  select(CODGEO, evolRP0919, evolressec0919, evolvac0919, 
+         evolmen0919, evolpiece0919)-> insee.logement0919
 
 # Prix de l'immobilier
 # LN
@@ -121,13 +122,15 @@ insee.communes22 %>%
   left_join(filosofi.revenu2020, by = "CODGEO") %>%
   left_join(insee.menages0919, by = "CODGEO") %>%
   left_join(insee.emploi1121, by = "CODGEO") %>% 
-  left_join(insee.logement1, by = "CODGEO") %>% 
+  left_join(insee.logement0919, by = "CODGEO") %>% 
   left_join(insee.immobilier, by = "CODGEO") %>%
   left_join(insee.densite2023, by = "CODGEO") %>%
   right_join(internaute.soleil, by = "DEP") %>%
   left_join(onas.communes, by = "CODGEO") %>%
-  mutate(partlitstour23 = litstour23 / pop2019) %>% # part du nombre de lits de tourisme dans la population
-  select(-pop2019, -litstour23, -act1121, -artifhab, -valeursurf) %>% # NA élevés valeursurf
+  filter_at(vars(starts_with("artifh")), any_vars(. != 0)) %>% # division par 0
+  mutate(partlitstour23 = litstour23 / pop2019, # part du nombre de lits de tourisme dans la population
+         effarthab = men0919 / artifhab) %>% # efficacité de l'artificialisation liée à l'habitat
+  select(-pop2019, -litstour23, -act1121, -artifhab, -valeursurf, -evolRP0919, -evolvac0919) %>% # NA élevés valeursurf
   write_excel_csv("./../res/determinants-artificialisation.csv", 
                   quote = "all") -> determinants.artificialisation
 
@@ -140,7 +143,7 @@ determinants.artificialisation %>%
   filter_all(all_vars(!is.na(.))) %>%
   print() %>%
   PCA(ncp = 5, graph = FALSE, 
-      quanti.sup = c("artcom2020", "nafart1121"), 
+      quanti.sup = c("artcom2020", "nafart1121", "effarthab"), 
       quali.sup = c("libdens"),
       scale.unit = TRUE) -> res.pca
 

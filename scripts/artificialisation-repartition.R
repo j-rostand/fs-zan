@@ -19,7 +19,7 @@ readxl::read_xlsx(path = "./../data/base-cc-serie-historique-2018.xlsx",
 # https://www.insee.fr/fr/statistiques/fichier/6439600/grille_densite_7_niveaux_detaille_2023.xlsx
 readxl::read_xlsx(path = "./../data/grille_densite_7_niveaux_detaille_2023.xlsx", 
                   skip = 1) -> insee_grille_densite_2023
-# Fichier de l'Observatoire nationak, tel que transformé par le script artificialisation-flux.R
+# Fichier de l'Observatoire national, tel que transformé par le script artificialisation-flux.R
 read_csv(file = "./../res/artificialisation-communes-2011-2021.csv", 
          col_types = "cc") -> artificialisation_communes_2021
 
